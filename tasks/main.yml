@@ -1,0 +1,42 @@
+---
+
+#- name: Display the current timestamp in YYYY-MM-DD
+#  set_fact:
+#    minio_config_suffix: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+
+- name: Creates directories
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: true
+#    owner: foo
+#    group: foo
+#    mode: '0644'
+  with_items:
+    - {path: "{{ minio_directory }}"}
+    - {path: "{{ minio_data_directory }}"}
+    - {path: "{{ minio_certs_directory }}"}
+
+- name: Помещаем сертификат банковского CA на сервер
+  copy:
+    src: ip/private.key
+    dest: "{{ minio_certs_directory }}/private.key"
+
+- name: Помещаем сертификат банковского CA на сервер
+  copy:
+    src: ip/public.crt
+    dest: "{{ minio_certs_directory }}/public.crt"
+
+
+- name: Помещаем сертификат банковского CA на сервер
+  copy:
+    src: haproxy.cfg
+    dest: "{{ minio_directory }}/haproxy.cfg"
+    
+
+- name: Deploy minio docker-compose.yml
+  template:
+    src: docker-compose.yml
+    dest: "{{ minio_docker_compose }}"
+
+- include_tasks: docker.yml

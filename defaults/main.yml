@@ -1,0 +1,25 @@
+---
+
+  minio_instance: storage
+  minio_image: minio/minio
+  minio_image_tag: RELEASE.2022-07-15T03-44-22Z
+
+  minio_access_key: minio
+  minio_secret_key: minio789
+
+  public_network_name:
+
+  minio_api_domain: "{{ minio_instance }}.{{ public_hostname }}"
+  minio_console_domain: "console.{{ minio_instance }}.{{ public_hostname }}"
+
+  # minio_nginx_image: openresty/openresty
+  # minio_nginx_image_tag: 1.19.9.1-4-alpine-fat
+
+
+  storage_url: https://{{ storage_domain }}
+
+
+  minio_directory: /srv/{{ minio_instance }}
+  minio_certs_directory: "{{ minio_directory }}/certs"
+  minio_data_directory: "{{ minio_directory }}/state/data"
+  minio_docker_compose: "{{ minio_directory }}/docker-compose.yml"

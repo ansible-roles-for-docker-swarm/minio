@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+
+  haproxy:
+    image: haproxy:2.6.1-alpine3.16
+    volumes:
+      - "{{ minio_directory }}/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+    networks:
+      - "{{ public_network_name }}"
+    deploy:
+        labels:
+        - "traefik.enable=true"
+
+        - "traefik.api.port=9000"
+        - "traefik.api.frontend.rule=Host:{{ minio_api_domain }}"
+
+        - "traefik.console.port=9001"
+        - "traefik.console.frontend.rule=Host:{{ minio_console_domain }}"
+
+  minio:
+    image: "{{ minio_image }}:{{ minio_image_tag }}"
+    env_file:
+      -  "{{ minio_directory }}/env.minio"
+    volumes:
+      -  "{{ minio_data_directory }}:/data"
+      # ERROR Unable to create certs CA directory at /home/user/.minio/certs/CAs: mkdir /home/user/.minio/certs/CAs: read-only file system
+      - "{{ minio_certs_directory }}:/home/user/.minio/certs"
+
+#    ports:
+#      - target: 9000
+#        published: 9000
+#        protocol: tcp
+#        mode: host
+
+#      - target: 9001
+#        published: 9001
+#        protocol: tcp
+#        mode: host
+
+    command: server /data --console-address ":9001" --certs-dir /home/user/.minio/certs
+
+#            healthcheck:
+#              test: curl -sS http://127.0.0.1 || echo 1
+#              interval: 5s
+#              timeout: 10s
+#              retries: 3
+
+    networks:
+      - "{{ public_network_name }}"
+
+networks:
+    {{ public_network_name }}:
+        external: true

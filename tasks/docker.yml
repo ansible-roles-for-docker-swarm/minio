@@ -1,0 +1,30 @@
+---
+
+- name: Deploy env.minio file
+  template:
+    src: env.minio
+    dest:  "{{ minio_directory }}/env.minio"
+
+#- name: Create minio nginx config
+#  docker_config:
+#    name: minio_nginx_{{ minio_config_suffix }}
+#    data: "{{ lookup('template', 'nginx.minio.conf') | b64encode }}"
+#    data_is_b64: true
+#    state: present
+
+- name: Deploy minio stack
+  docker_stack:
+    state: present
+    name: "{{ minio_instance }}"
+    resolve_image: never
+    with_registry_auth: yes
+    prune: true
+    compose:
+      - "{{ minio_docker_compose }}"
+
+# use files parameter to use multiple docker-compose.yml files
+#- name: Deploy minio stack
+#  docker_compose:
+#    project_src: "{{ minio_directory }}"
+#    files:
+#    - "{{ minio_docker_compose }}"
